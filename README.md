@@ -29,7 +29,7 @@ celery_bin: celery                                                        # Cele
                                                                             # celery_bin: "python /path/to/django/manage.py celery --settings=settings"
                                                                             # celery_bin: "/path/to/virtualenv/python /path/to/django/manage.py celery --settings=settings"
 
-celery_service: upstart                                                   # process manager (upstart/init/systemd), default upstart
+celery_service: upstart                                                   # process manager (upstart/systemd), default upstart
 
 
 celery_run:                                                               # Start celery. See default values below. Ex:
