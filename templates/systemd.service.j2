@@ -35,7 +35,7 @@ EnvironmentFile={{ env_file }}
 {% endif -%}
 
 WorkingDirectory={{ work_dir }}
-User={{ item_user }}
+User=root
 
 {# Run any pre-exec commands we have defined, e.g `. /path/to/your/env_vars/.env`#}
 {% for line in app.celery_pre_exec|default(celery_pre_exec) %}
