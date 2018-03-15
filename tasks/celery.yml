@@ -6,16 +6,6 @@
     path: "{{ item.run_dir|default(celery_run_dir) }}"
   with_items: "{{ celery_run }}"
 
-- name: Configure celery
-  template:
-    src: upstart.conf.j2
-    dest: "/etc/init/{{ celery_app_name }}-{{ item.action|default('worker') }}{{ item.queue|default('') and ('-' + item.queue) or ''}}.conf"
-    owner: root
-    group: root
-    mode: 0644
-  with_items: "{{ celery_run }}"
-  notify: celery reload
-
 - name: Prepare log directories
   file:
     state: directory
@@ -23,13 +13,49 @@
     owner: "{{ item.user|default(celery_user) }}"
   with_items: "{{ celery_run }}"
 
+- name: Setup Upstart
+  template:
+    src: upstart.conf.j2
+    dest: "/etc/init/{{ celery_app_name }}-{{ item.action|default('worker') }}{{ item.queue|default('') and ('-' + item.queue) or ''}}.conf"
+    owner: root
+    group: root
+    mode: 0644
+  with_items: "{{ celery_run }}"
+  when: celery_service == 'upstart'
+  notify: celery reload
+
+- name: Setup Init
+  template:
+    src: "init.j2"
+    dest: "/etc/init.d/{{ celery_app_name }}-{{ item.action|default('worker') }}{{ item.queue|default('') and ('-' + item.queue) or ''}}"
+    owner: root
+    group: root
+    mode: 0755
+  with_items: "{{ celery_run }}"
+  when: celery_service == 'init'
+  notify: celery reload
+
+- name: Setup SystemD
+  template:
+    src: "systemd.service.j2"
+    dest: "/etc/systemd/system/{{ celery_app_name }}-{{ item.action|default('worker') }}{{ item.queue|default('') and ('-' + item.queue) or ''}}.service"
+    owner: root
+    group: root
+    mode: 0644
+  with_items: "{{ celery_run }}"
+  when: celery_service == 'systemd'
+  notify: celery reload
+  tags: celery
+
 - name: Ensure celery service is started
   service:
-      name: "{{ celery_app_name }}-{{ item.action|default('worker') }}{{ item.queue|default('') and ('-' + item.queue) or ''}}"
-      state: started
-      enabled: yes
+    name: "{{ celery_app_name }}-{{ item.action|default('worker') }}{{ item.queue|default('') and ('-' + item.queue) or ''}}"
+    state: started
+    enabled: yes
+  ignore_errors: yes
   with_items: "{{ celery_run }}"
   changed_when: no
+  tags: celery
 
 - name: Setup logrotate
   template:

@@ -10,6 +10,21 @@
   file:
     state: absent
     path: "/etc/init/{{ celery_app_name }}-{{ item.action|default('worker') }}{{ item.queue|default('') and ('-' + item.queue) or ''}}"
+  when: celery_service == 'init'
+  with_items: "{{ celery_run }}"
+
+- name: Delete init configuration
+  file:
+    state: absent
+    path: "/etc/init.d/{{ celery_app_name }}-{{ item.action|default('worker') }}{{ item.queue|default('') and ('-' + item.queue) or ''}}"
+  when: celery_service == 'init'
+  with_items: "{{ celery_run }}"
+
+- name: Delete systemd configuration
+  file:
+    state: absent
+    path: "/etc/systemd/system/{{ celery_app_name }}-{{ item.action|default('worker') }}{{ item.queue|default('') and ('-' + item.queue) or ''}}.service"
+  when: celery_service == 'systemd'
   with_items: "{{ celery_run }}"
 
 - name: Delete logrotate configurations
