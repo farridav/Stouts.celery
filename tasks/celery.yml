@@ -44,7 +44,7 @@
     mode: 0644
   with_items: "{{ celery_run }}"
   when: celery_service == 'systemd'
-  notify: celery reload
+  notify: celery restart
   tags: celery
 
 - name: Ensure celery service is started
