@@ -37,12 +37,22 @@
     WorkingDirectory={{ work_dir }}
     User=root
 
-    {# Run any pre-exec commands we have defined, e.g `. /path/to/your/env_vars/.env`#}
     {% for line in app.celery_pre_exec|default(celery_pre_exec) %}
     ExecStartPre={{ line }}
     {% endfor %}
 
-    ExecStart={{ celery_bin }} {{ app.action }} {{ celery_queue_arg }} {{ celery_concurrency_arg }} --pidfile="{{ celery_pid_file }}" --logfile="{{ celery_log_file }}" --loglevel="{{ celery_log_level }}" --app="{{ celery_app }}" --workdir="{{ work_dir }}" --uid="{{ item_user }}" --gid="{{ item_group }}" {% if app.action == 'beat' %}--schedule={{ celery_beat_dbfile }}{% endif %}
+    ExecStart={{ celery_bin }} {{ app.action }} {{ celery_queue_arg }} {{ celery_concurrency_arg }} \
+              --pidfile="{{ celery_pid_file }}" \
+              --logfile="{{ celery_log_file }}" \
+              --loglevel="{{ celery_log_level }}" \
+              --app="{{ celery_app }}" \
+              --workdir="{{ work_dir }}" \
+              --uid="{{ item_user }}" \
+              --gid="{{ item_group }}" \
+              --broker {{ celery_app_broker }} \
+              {% if app.action == 'beat' %}
+              --schedule={{ celery_beat_dbfile }}
+              {% endif %}
 
     Restart=always
     KillSignal=SIGQUIT
