@@ -36,3 +36,5 @@ celery_beat_dbfile: "{{ celery_run_dir }}/beat-schedule"                  # Put 
 celery_log_dir: "{{ deploy_log_dir|default(celery_prefix + '/log') }}"    # Set default log directory
 celery_log_level: info                                                    # Set default log level
 celery_log_rotate: yes                                                    # Enable log rotation
+
+celery_broker: amqp://guest:guest@127.0.0.1:5672//
